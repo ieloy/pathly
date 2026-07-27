@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <title>Hello, Pathly!</title>
+    <link href="static/styles.css" rel="stylesheet">
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
+          <li><a href="{% url 'routes' %}">Routes</a></li>
+          <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
+          <li><a href="{% url 'sorting' %}">Sorting</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+        </ul>
+      </nav>
+    </header>
+    <h1>Routes</h1>
+    <h3>View the most optimal routing here.</h3>
+    {% if places %}
+      <p>Kml file gedetecteerd</p>
+    {% else %}
+      <p>No KML file detected, upload one here: <a href="{% url 'adminkml' %}">Admin KML</a></p>
+    {% endif %}
+    </body>
+  </html>

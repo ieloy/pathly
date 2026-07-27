@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <title>Hello, Pathly!</title>
+    <link href="static/styles.css" rel="stylesheet">
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
+          <li><a href="{% url 'routes' %}">Routes</a></li>
+          <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
+          <li><a href="{% url 'sorting' %}">Sorting</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+        </ul>
+      </nav>
+    </header>
+    <h1>Mapinfo</h1>
+    <h3>View information about the uploaded locations here.</h3>
+    <div id="mapinfo_header">
+      <h4 id="mapinfo_header1">Name</h4>
+      <h4 id="mapinfo_header2">City</h4>
+      <h4 id="mapinfo_header3">Province</h4>
+      <h4 id="mapinfo_header4">Postcode</h4>
+    </div>
+    {% if places %}
+      <ul id="mapinfo_places">
+        {% for name, data in places.items %}
+        {% with city=data.0 province=data.1 postcode=data.2 %}
+        <li>{{ name }}</li> 
+        <li>{{ city }}</li> 
+        <li>{{ province }}</li> 
+        <li>{{ postcode }}</li>
+        {% endwith %}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Navigate to <a href="{% url 'adminkml' %}">Admin KML</a> in order to upload your KML file.</p>
+    {% endif %}
+  </body>
+  </html>

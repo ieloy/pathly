@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hello, Pathly!</title>
+  <link href="static/styles.css" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
+        <li><a href="{% url 'routes' %}">Routes</a></li>
+        <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
+        <li><a href="{% url 'sorting' %}">Sorting</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+      </ul>
+    </nav>
+  </header>
+  <h1>Home</h1>
+  <p>Welcome to pathly! The solution to multi-destination travel routing.<br>
+    {% if places %}
+      <h3>Click on a place to visit it's Google Maps location!</h3>
+      <ul id="index_places">
+        {% for name, data in places.items %}
+        <li class="unique_place"><a href="https://www.google.com/maps?q={{ data.0 }}" target="_blank">{{ name }}</a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      Navigate to <a href="{% url 'adminkml' %}">Admin KML</a> in order to upload your KML file.</p>
+    {% endif %}
+</body>
+</html>

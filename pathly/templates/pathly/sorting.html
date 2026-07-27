@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Hello, Pathly!</title>
+  <link href="static/styles.css" rel="stylesheet">
+  <script src="static/main.js"></script>
+</head>
+
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
+        <li><a href="{% url 'routes' %}">Routes</a></li>
+        <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
+        <li><a href="{% url 'sorting' %}">Sorting</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+      </ul>
+    </nav>
+  </header>
+  <h1>Sorting</h1>
+  <h3>Sort your selected locations accordingly here.</h3>
+  {% if places %}
+  <div class="groups_container">
+    {% for marker_code, marker_data in places.items %}
+    <div class="marker_container">
+      {% if marker_data.icon %}
+      <div class="marker" style="--marker-color: {{ marker_data.color }};">
+        <img src="{{ marker_data.icon }}" alt="Marker Icon" class="marker-image">
+      </div>
+      {% endif %}
+      <ul class="location_list">
+        {% for location in marker_data.locations %}
+        <li>{{ location }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <h4>No KML file detected, upload one here: <a href="{% url 'adminkml' %}">Admin KML</a></h4>
+  {% endif %}
+  <div class="specifications">
+    <h3>Specifications</h3>
+    <h4>Select your specifications in the form below.</h4>
+    <form id="spec_form">
+      {% csrf_token %}
+      <h4>General</h4>
+      <label for="group_amount">Select the amount of locations per group</label>
+      <input type="number" id="group_amount" name="group_amount" class="group_amount" placeholder="Amount:" min="0">
+      <div id="spec_parent_container">
+        <div class="specifications_container">
+          <h4>Marker specific</h4>
+          <label for="spec_select">Select specifications:</label>
+          <select class="spec_select" name="marker">
+            <option value="">No specifications</option>
+            {% for spec in places.keys %}
+            <option value="{{ spec }}">Marker {{ forloop.counter }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" name="count_per_group" class="spec_amount" placeholder="Amount per group" min="0">
+
+          <h4>Marker combinations</h4>
+
+          <label for="spec_combo">Select if specification should NOT be combined:</label>
+          <select class="spec_combo" name="no_combi_with">
+            <option value="">None</option>
+            {% for spec in places.keys %}
+            <option value="{{ spec }}">Marker {{ forloop.counter }}</option>
+            {% endfor %}
+          </select>
+          <br>
+          <label for="spec_combo_amount">Select how many of selected specification should (at least) be combined with:</label>
+          <select class="spec_combo" name="combi_with">
+            <option value="">None</option>
+            {% for spec in places.keys %}
+            <option value="{{ spec }}">Marker {{ forloop.counter }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" name="combi_with_amount" class="spec_combo_amount" placeholder="Amount to combine" min="0">
+          <label for="spec_cap">Hard cap amount?</label>
+          <input type="checkbox" name="spec_cap" class="spec_cap" id="spec_cap">
+          <label for="cap_amount">Cap amount:</label>
+          <input type="number" name="cap_amount" class="cap_amount" placeholder="Cap amount" min="0">
+        </div>
+      </div>
+      <input type="button" value="Add New Specification" id="add-spec-button">
+      <div>
+        <label for="randomize">Randomize:</label>
+        <input type="checkbox" id="randomize" name="randomize">
+      </div>
+      <div>
+        <input id="spec_reset" type="reset" value="Reset">
+      </div>
+
+      <div>
+        <input id="spec_submit" type="submit" value="Submit">
+      </div>
+    </form>
+  </div>
+</body>
+
+</html>

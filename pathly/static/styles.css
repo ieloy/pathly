@@ -1,0 +1,194 @@
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+header {
+  width: 100%;
+  height: 60px;
+  background-color: gray;
+}
+nav {
+  height: 100%
+}
+ul {
+  height: 100%;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-evenly;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+li {
+  list-style: none;
+}
+ul li a {
+  color: hsl(0, 0%, 25%);
+  text-decoration: none;
+}
+#file-upload-div {
+  width: 350px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#file-upload-div form {
+  display: flex;
+}
+
+#upload-btn {
+  font-size: 24px;
+  cursor: pointer;
+  background-color: darkgray;
+  height: 150px;
+  width: 300px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  margin-right: 5px;
+}
+#submit-btn {
+  font-size: 24px;
+  cursor: pointer;
+  background-color: lightblue;
+  height: 75px;
+  width: 150px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  border: none;
+  margin-top: 37px;
+}
+#index_places {
+  display: grid;
+  grid-template-columns: repeat(5, 160px);
+  gap: 12px;
+  justify-content: center;
+}
+.unique_place {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  width: 160px;
+  border: 1px solid black;
+}
+.unique_place a {
+  color: black;
+}
+.unique_place a:hover {
+  text-decoration: underline;
+}
+#mapinfo_header {
+  display: flex;
+  height: 40px;
+  width: 720px;
+}
+#mapinfo_header1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 180px;
+}
+#mapinfo_header2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 180px;
+}
+#mapinfo_header3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 180px;
+}
+#mapinfo_header4 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 180px;
+}
+#mapinfo_places {
+  display: grid;
+  grid-template-columns: repeat(4, 180px);
+  justify-content: center;
+  border: 1px solid black;
+}
+#mapinfo_places li {
+  text-align: center;
+  border: 1px solid black;
+}
+.groups_container {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24px;
+}
+.marker_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.location_list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.marker-icon {
+  width: 40px;
+  height: 40px;
+  display: block;
+
+  background-color: var(--marker-color);
+
+  -webkit-mask-image: var(--marker-icon);
+  mask-image: var(--marker-icon);
+
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+.marker {
+  background-color: var(--marker-color);
+  border: 3px solid var(--marker-color);
+}
+.specifications {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+#spec_form {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 12px;
+}
+#spec_submit, #spec_reset {
+  background-color: rgb(115, 203, 233);
+  font-size: 18px;
+  width: 80px;
+  height: 45px;
+  border: 2px solid rgb(115, 203, 233);
+}
+#spec_submit:hover, #spec_reset:hover {
+  background-color: rgb(53, 174, 255);
+  cursor: pointer;
+  border: 2px solid rgb(53, 174, 255);
+}
+.specifications_container {
+  border: 1px solid black;
+  margin-bottom: 12px;
+}

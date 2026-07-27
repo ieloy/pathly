@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <title>Hello, Pathly!</title>
+    <link href="static/styles.css" rel="stylesheet">
+    <script src="static/main.js"></script>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
+          <li><a href="{% url 'routes' %}">Routes</a></li>
+          <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
+          <li><a href="{% url 'sorting' %}">Sorting</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+        </ul>
+      </nav>
+    </header>
+    <h1>Admin KML</h1>
+    <h3>Upload your KML file here.</h3>
+    <div id="file-upload-div">
+      <form id="kml-upload-form" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file-upload" id="upload-btn">Upload KML bestand</label>
+        <input id="file-upload" type="file" accept=".kml" hidden>
+        <button id="submit-btn" type="submit">Submit</button>
+      </form>
+    </div>
+    {% if places %}
+      <h3>KML-file detected! Head on to the other pages.</h3>
+      <h5>KML file is used to show geographical data, for this purpose: create a google maps dataset.</h5>
+    {% else %}
+      <h3>Upload your KML-file above.</h3>
+    {% endif %}
+  </body>
+  </html>

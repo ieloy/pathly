@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <title>Hello, Pathly!</title>
+    <link href="static/styles.css" rel="stylesheet">
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
+          <li><a href="{% url 'routes' %}">Routes</a></li>
+          <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
+          <li><a href="{% url 'sorting' %}">Sorting</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+        </ul>
+      </nav>
+    </header>
+    <h1>About</h1>
+    <h3>This webapplication was created as a final project for the CS50's web development course.</h3>
+  </body>
+  </html>
