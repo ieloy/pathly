@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import requests
 import xml.etree.ElementTree as ET
 from django.http import HttpResponse, JsonResponse
@@ -206,17 +207,87 @@ def handle_specifications(request):
     data = json.loads(request.body)
 
     specifications = data.get("specifications", [])
-    randomize = data.get("randomize", False)
+    group_amount = int(data.get("groupAmount"))
 
     print(specifications)
-    print(randomize)
 
-    apply_specifications(get_places(request), specifications, randomize)
+    apply_specifications(get_places(request), specifications, group_amount)
 
     return JsonResponse({"success": True})
   
   else:
     return JsonResponse({"success": False, "error": "Invalid request method."})
   
-def apply_specifications(places, specifications, randomize):
-  pass
+def apply_specifications(places, specifications, group_amount):
+  locations = []
+
+  for name, place_data in places.items():
+    locations.append({
+      "name": name,
+      "coordinates": place_data[0],
+      "marker": place_data[1]
+    })
+
+  random.shuffle(locations)
+
+  groups = []
+
+  for location in locations:
+    placed = False
+
+    for group in groups:
+      if can_add_location(
+        group,
+        location,
+        specifications,
+        group_amount
+      ):
+        group.append(location)
+        placed = True
+        break
+
+    if not placed:
+      groups.append([location])
+
+  return groups
+
+def can_add_location(group, location, specifications, group_amount):  
+  if len(group) >= group_amount:
+    return False
+
+  marker_limit = None
+
+  for spec in specifications:
+    if spec["marker"] == location["marker"]:
+      marker_amount = spec.get("markerAmount")
+
+      if marker_amount:
+        marker_limit = int(marker_amount)
+
+      break
+
+  if marker_limit is not None:
+    current_marker_amount = count_markers(group, location["marker"])
+
+    if current_marker_amount >= marker_limit:
+      return False
+    
+  for spec in specifications:
+    if spec["marker"] == location["marker"]:
+      forbidden_marker = spec.get("notCombine")
+
+      if forbidden_marker and count_markers(group, forbidden_marker) > 0:
+        return False
+      
+    if spec.get("notCombine") == location["marker"]:
+      if count_markers(group, spec["marker"]) > 0:
+        return False
+  
+  return True
+
+def count_markers(group, marker):
+  return sum(
+    1
+    for location in group
+    if location["marker"] == marker
+  )

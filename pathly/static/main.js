@@ -79,10 +79,9 @@ async function handleSpecifications(event) {
     })
   }
   )
-  const randomize = document.getElementById("randomize").checked;
   const groupAmount = document.getElementById("group_amount").value;
   const csrftoken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
-  console.log(specifications, randomize);
+  console.log(specifications);
 
    const response = await fetch("handle_specifications", {
     method: "POST",
@@ -92,8 +91,7 @@ async function handleSpecifications(event) {
     },
     body: JSON.stringify({
       specifications,
-      groupAmount,
-      randomize
+      groupAmount
     })
    });
    console.log(response);
