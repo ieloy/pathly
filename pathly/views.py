@@ -71,6 +71,7 @@ def handle_kml(request):
       "kml": "http://www.opengis.net/kml/2.2"
     }
 
+    # Check markers in the root of the KML file and store them correctly in the dict
     for style in root.findall(".//kml:Style", ns):
       style_id = style.get("id")
       icon_href = style.find(".//kml:Icon/kml:href", ns)
@@ -93,6 +94,7 @@ def handle_kml(request):
           "color": css_color
         }
 
+    # Check StyleMap and store them in the dict
     for style_map in root.findall(".//kml:StyleMap", ns):
       style_map_id = style_map.get("id")
 
@@ -110,6 +112,7 @@ def handle_kml(request):
 
     placemarks = root.findall(".//kml:Placemark", ns)
 
+    # Check placemarks in the KML file and store their data in a dict
     for placemark in placemarks[0:25]:
       name = placemark.find("kml:name", ns)
       coordinates = placemark.find(".//kml:coordinates", ns)
@@ -133,6 +136,7 @@ def handle_kml(request):
         icon_color
       ]
       
+    # Find relevant extra info for each place
     places_extra_info = find_location_info(places)
     
     request.session["places"] = places
@@ -158,6 +162,7 @@ def find_location_info(places):
   places_extra_info = {}
   api_key = get_credentials()
 
+  # Check each place and add relevant information to the dictionary
   for place in places:
     coordinates = places[place][0]
     url = (
@@ -209,6 +214,7 @@ def handle_specifications(request):
     specifications = data.get("specifications", [])
     group_amount = int(data.get("groupAmount"))
 
+    # Apply specifications to the places and create the groups
     groups = apply_specifications(get_places(request), specifications, group_amount)
     print(groups)
 
@@ -230,8 +236,10 @@ def apply_specifications(places, specifications, group_amount):
       "marker": place_data[1]
     })
 
+  # Shuffle locations to not get the same groups every time
   random.shuffle(locations)
 
+  # Create groups based on specifications
   valid_groups = create_groups(locations, specifications, group_amount)
 
   return valid_groups
@@ -242,6 +250,7 @@ def can_add_location(group, location, specifications, group_amount):
 
   marker_limit = None
 
+  # Check if marker has a limit
   for spec in specifications:
     if spec["marker"] == location["marker"]:
       marker_amount = spec.get("markerAmount")
@@ -251,12 +260,14 @@ def can_add_location(group, location, specifications, group_amount):
 
       break
 
+  # Check if adding location exceeds marker limit
   if marker_limit is not None:
     current_marker_amount = count_markers(group, location["marker"])
 
     if current_marker_amount >= marker_limit:
       return False
     
+  # Prevent forbidden marker combinations in both directions
   for spec in specifications:
     if spec["marker"] == location["marker"]:
       forbidden_marker = spec.get("notCombine")
@@ -267,6 +278,9 @@ def can_add_location(group, location, specifications, group_amount):
     if spec.get("notCombine") == location["marker"]:
       if count_markers(group, spec["marker"]) > 0:
         return False
+      
+  if exceeds_cap(group, location, specifications):
+    return False
   
   return True
 
@@ -309,6 +323,7 @@ def create_groups(locations, specifications, group_amount):
   for location in locations:
     placed = False
 
+    # Try to add location to a group, if not possible, create a new group
     for group in groups:
       if can_add_location(
         group,
@@ -326,11 +341,38 @@ def create_groups(locations, specifications, group_amount):
   valid_groups = []
   invalid_locations = []
 
+  # Check groups for validity based on combine value, if not valid, add to invalid list
   for group in groups:
     if check_group_validity(group, specifications):
       valid_groups.append(group)
     else:
       invalid_locations.extend(group)
   
-  # If there are still invalid locations, retry to add them in groups
+  # If there are still invalid locations, retry to add them in groups (TODO)
   return valid_groups
+
+def exceeds_cap(group, location, specifications):
+  group_with_location = group + [location]
+
+  for spec in specifications:
+    cap_enabled = spec.get("cap")
+
+    if not cap_enabled:
+      continue
+
+    marker = spec.get("marker")
+    combine_marker = spec.get("combine")
+    cap_amount = spec.get("capAmount")
+
+    if not marker or not combine_marker or not cap_amount:
+      continue
+
+    if count_markers(group_with_location, marker) == 0:
+      continue
+
+    cap_amount = int(cap_amount)
+
+    if count_markers(group_with_location, combine_marker) > cap_amount:
+      return True
+    
+  return False
