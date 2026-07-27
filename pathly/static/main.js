@@ -80,10 +80,9 @@ async function handleSpecifications(event) {
   }
   )
   const groupAmount = document.getElementById("group_amount").value;
-  const csrftoken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
-  console.log(specifications);
+  const csrftoken = document.querySelector('[name="csrfmiddlewaretoken"]').value
 
-   const response = await fetch("handle_specifications", {
+  const response = await fetch("handle_specifications", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -93,9 +92,12 @@ async function handleSpecifications(event) {
       specifications,
       groupAmount
     })
-   });
-   console.log(response);
-}
+    });
+
+    const data = await response.json();
+    console.log("Reponse", data.groups);
+   
+  }
 
 function setupSpecificationContainer(container) {
   const markerSelect = container.querySelector('[name="marker"]');

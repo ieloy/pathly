@@ -209,11 +209,13 @@ def handle_specifications(request):
     specifications = data.get("specifications", [])
     group_amount = int(data.get("groupAmount"))
 
-    print(specifications)
+    groups = apply_specifications(get_places(request), specifications, group_amount)
+    print(groups)
 
-    apply_specifications(get_places(request), specifications, group_amount)
-
-    return JsonResponse({"success": True})
+    return JsonResponse({
+      "success": True,
+      "groups": groups
+      })
   
   else:
     return JsonResponse({"success": False, "error": "Invalid request method."})
@@ -230,26 +232,9 @@ def apply_specifications(places, specifications, group_amount):
 
   random.shuffle(locations)
 
-  groups = []
+  valid_groups = create_groups(locations, specifications, group_amount)
 
-  for location in locations:
-    placed = False
-
-    for group in groups:
-      if can_add_location(
-        group,
-        location,
-        specifications,
-        group_amount
-      ):
-        group.append(location)
-        placed = True
-        break
-
-    if not placed:
-      groups.append([location])
-
-  return groups
+  return valid_groups
 
 def can_add_location(group, location, specifications, group_amount):  
   if len(group) >= group_amount:
@@ -291,3 +276,61 @@ def count_markers(group, marker):
     for location in group
     if location["marker"] == marker
   )
+
+def check_group_validity(group, specifications):
+  for spec in specifications: 
+    marker = spec.get("marker")
+    combine_marker = spec.get("combine")
+    combine_amount = spec.get("combineAmount")
+
+    if not marker or not combine_marker or not combine_amount:
+      continue
+
+    combine_amount = int(combine_amount)
+
+    marker_amount_in_group = count_markers(group, marker)
+
+    if marker_amount_in_group == 0:
+      continue
+
+    combined_amount_in_group = count_markers(
+      group,
+      combine_marker
+    )
+
+    if combined_amount_in_group < combine_amount:
+      return False
+    
+  return True
+  
+def create_groups(locations, specifications, group_amount):
+  groups = []
+
+  for location in locations:
+    placed = False
+
+    for group in groups:
+      if can_add_location(
+        group,
+        location,
+        specifications,
+        group_amount
+      ):
+        group.append(location)
+        placed = True
+        break
+
+    if not placed:
+      groups.append([location])
+
+  valid_groups = []
+  invalid_locations = []
+
+  for group in groups:
+    if check_group_validity(group, specifications):
+      valid_groups.append(group)
+    else:
+      invalid_locations.extend(group)
+  
+  # If there are still invalid locations, retry to add them in groups
+  return valid_groups
