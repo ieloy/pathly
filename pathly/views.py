@@ -7,7 +7,6 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from dotenv import load_dotenv
 
-
 # Create your views here.
 def index(request):
   places = get_places(request)
@@ -43,12 +42,19 @@ def sorting(request):
     "places": sorted_places
   })
 
+def manual_sorting(request):
+  places = get_places(request)
+  sorted_places = sort_locations(places)
+  
+  return render(request, "pathly/manual_sorting.html", {
+    "places": sorted_places
+  })
+
 def adminkml(request):
   places = get_places(request)
   return render(request, "pathly/adminkml.html", {
     "places": places
   })
-
 
 #helper functions
 def handle_kml(request):
@@ -149,63 +155,6 @@ def handle_kml(request):
         "filename": kml_file.name,
         "size": kml_file.size,
       })
-    
-def get_places(request):
-  return request.session.get("places")
-
-def get_credentials():
-  load_dotenv()
-  api_key = os.getenv("API_KEY")
-  return api_key
-  
-def find_location_info(places):
-  places_extra_info = {}
-  api_key = get_credentials()
-
-  # Check each place and add relevant information to the dictionary
-  for place in places:
-    coordinates = places[place][0]
-    url = (
-      f"https://maps.googleapis.com/maps/api/geocode/json"
-      f"?latlng={coordinates}"
-      f"&key={api_key}"
-    )
-    response = requests.get(url).json()
-    components = response["results"][0]["address_components"]
-  
-    city = None
-    province = None
-    postcode = None
-
-    for component in components:
-      if "locality" in component["types"]:
-        city = component["long_name"]
-
-      elif "administrative_area_level_1" in component["types"]:
-        province = component["long_name"]
-
-      elif "postal_code" in component["types"]:
-        postcode = component["long_name"]
-
-    places_extra_info[place] = city, province, postcode
-  
-  return places_extra_info
-
-def sort_locations(places):
-  sorted_places = {}
-
-  for place, place_data in places.items():
-    marker_code = place_data[1]
-
-    if marker_code not in sorted_places:
-      sorted_places[marker_code] = {
-        "icon": place_data[2],
-        "color": f"#{place_data[3]}",
-        "locations": []
-      }
-    sorted_places[marker_code]["locations"].append(place)
-
-  return sorted_places
 
 def handle_specifications(request):
   if request.method == "POST":
@@ -242,6 +191,40 @@ def apply_specifications(places, specifications, group_amount):
   # Create groups based on specifications
   valid_groups = create_groups(locations, specifications, group_amount)
 
+  return valid_groups
+
+def create_groups(locations, specifications, group_amount):
+  groups = []
+
+  for location in locations:
+    placed = False
+
+    # Try to add location to a group, if not possible, create a new group
+    for group in groups:
+      if can_add_location(
+        group,
+        location,
+        specifications,
+        group_amount
+      ):
+        group.append(location)
+        placed = True
+        break
+
+    if not placed:
+      groups.append([location])
+
+  valid_groups = []
+  invalid_locations = []
+
+  # Check groups for validity based on combine value, if not valid, add to invalid list
+  for group in groups:
+    if check_group_validity(group, specifications):
+      valid_groups.append(group)
+    else:
+      invalid_locations.extend(group)
+  
+  # If there are still invalid locations, retry to add them in groups (TODO)
   return valid_groups
 
 def can_add_location(group, location, specifications, group_amount):  
@@ -284,14 +267,8 @@ def can_add_location(group, location, specifications, group_amount):
   
   return True
 
-def count_markers(group, marker):
-  return sum(
-    1
-    for location in group
-    if location["marker"] == marker
-  )
-
 def check_group_validity(group, specifications):
+  # Check if combination of markers in the group is the amount it should be
   for spec in specifications: 
     marker = spec.get("marker")
     combine_marker = spec.get("combine")
@@ -316,40 +293,6 @@ def check_group_validity(group, specifications):
       return False
     
   return True
-  
-def create_groups(locations, specifications, group_amount):
-  groups = []
-
-  for location in locations:
-    placed = False
-
-    # Try to add location to a group, if not possible, create a new group
-    for group in groups:
-      if can_add_location(
-        group,
-        location,
-        specifications,
-        group_amount
-      ):
-        group.append(location)
-        placed = True
-        break
-
-    if not placed:
-      groups.append([location])
-
-  valid_groups = []
-  invalid_locations = []
-
-  # Check groups for validity based on combine value, if not valid, add to invalid list
-  for group in groups:
-    if check_group_validity(group, specifications):
-      valid_groups.append(group)
-    else:
-      invalid_locations.extend(group)
-  
-  # If there are still invalid locations, retry to add them in groups (TODO)
-  return valid_groups
 
 def exceeds_cap(group, location, specifications):
   group_with_location = group + [location]
@@ -376,3 +319,68 @@ def exceeds_cap(group, location, specifications):
       return True
     
   return False
+  
+
+def count_markers(group, marker):
+  return sum(
+    1
+    for location in group
+    if location["marker"] == marker
+  )
+
+def sort_locations(places):
+  sorted_places = {}
+
+  for place, place_data in places.items():
+    marker_code = place_data[1]
+
+    if marker_code not in sorted_places:
+      sorted_places[marker_code] = {
+        "icon": place_data[2],
+        "color": f"#{place_data[3]}",
+        "locations": []
+      }
+    sorted_places[marker_code]["locations"].append(place)
+
+  return sorted_places
+      
+def get_places(request):
+  return request.session.get("places")
+
+def get_credentials():
+  load_dotenv()
+  api_key = os.getenv("API_KEY")
+  return api_key
+
+def find_location_info(places):
+  places_extra_info = {}
+  api_key = get_credentials()
+
+  # Check each place and add relevant information to the dictionary
+  for place in places:
+    coordinates = places[place][0]
+    url = (
+      f"https://maps.googleapis.com/maps/api/geocode/json"
+      f"?latlng={coordinates}"
+      f"&key={api_key}"
+    )
+    response = requests.get(url).json()
+    components = response["results"][0]["address_components"]
+  
+    city = None
+    province = None
+    postcode = None
+
+    for component in components:
+      if "locality" in component["types"]:
+        city = component["long_name"]
+
+      elif "administrative_area_level_1" in component["types"]:
+        province = component["long_name"]
+
+      elif "postal_code" in component["types"]:
+        postcode = component["long_name"]
+
+    places_extra_info[place] = city, province, postcode
+  
+  return places_extra_info

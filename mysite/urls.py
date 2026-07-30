@@ -13,5 +13,6 @@ urlpatterns = [
     path("get_places", views.get_places, name="get_places"),
     path("handle_specifications", views.handle_specifications, name="handle_specifications"),
     path("apply_specifications", views.apply_specifications, name="apply_specifications"),
+    path("manual_sorting", views.manual_sorting, name="manual_sorting"),
     path("admin/", admin.site.urls),
 ]

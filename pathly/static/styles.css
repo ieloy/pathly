@@ -170,6 +170,7 @@ ul li a {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  margin-bottom: 24px;
 }
 #spec_form {
   display: grid;
@@ -179,7 +180,7 @@ ul li a {
 #spec_submit, #spec_reset {
   background-color: rgb(115, 203, 233);
   font-size: 18px;
-  width: 80px;
+  width: 180px;
   height: 45px;
   border: 2px solid rgb(115, 203, 233);
 }
@@ -191,4 +192,22 @@ ul li a {
 .specifications_container {
   border: 1px solid black;
   margin-bottom: 12px;
+}
+.specifications a {
+  color: black;
+  text-decoration: none;
+  font-family: Arial;
+  text-align: center;
+  align-items: center;
+  border: 3px solid rgb(115, 203, 233);
+  background-color: rgb(115, 203, 233);
+}
+.specifications a:hover {
+  background-color: rgb(53, 174, 255);
+  cursor: pointer;
+  border: 3px solid rgb(53, 174, 255);
+}
+#markers_container {
+  display: grid;
+  grid-template-columns: repeat(6, 90px);
 }
