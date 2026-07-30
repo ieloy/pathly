@@ -1,38 +1,46 @@
 <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <title>Hello, Pathly!</title>
-    <link href="static/styles.css" rel="stylesheet">
-  </head>
-  <body>
-    <header>
-      <nav>
-        <ul>
-          <li><a href="{% url 'index' %}">Home</a></li>
-          <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
-          <li><a href="{% url 'routes' %}">Routes</a></li>
-          <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
-          <li><a href="{% url 'sorting' %}">Sorting</a></li>
-          <li><a href="{% url 'about' %}">About</a></li>
-        </ul>
-      </nav>
-    </header>
-    <div id="markers_container">
+<html lang="en">
+
+<head>
+  <title>Hello, Pathly!</title>
+  <link href="static/styles.css" rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
+        <li><a href="{% url 'routes' %}">Routes</a></li>
+        <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
+        <li><a href="{% url 'sorting' %}">Sorting</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div id="markers_container">
     {% if places %}
-      {% for name, data in places.items %}
-      <div class="single_marker_container">
-        <h3>Marker</h3>
-        {% for marker_code, marker_data in places.items %}
-          {% if marker_data.icon %}
-          <div class="marmer" style="--marker-color: {{ marker_data.color }};">
-            <img src="{{ marker_data.icon }}" alt="Marker Icon" class="marker-image">
-          </div>
-          {% endif %}
+    <div class="groups_container_manual">
+      {% for marker_code, marker_data in places.items %}
+      <div class="marker_container_manual">
+
+        <div class="marker" style="--marker-color: {{ marker_data.color }};">
+          <img src="{{ marker_data.icon }}" alt="Marker Icon" class="marker-image">
         </div>
-        {% endfor %}
+
+        <ul class="location_list">
+          {% for location in marker_data.locations %}
+          <li>{{ location }}</li>
+          {% endfor %}
+        </ul>
+
+      </div>
       {% endfor %}
     </div>
-      <h3>No KML file detected, upload one here: <a href="{% url 'adminkml' %}">Admin KML</a></h3>
-    {% endif %}
-    </body>
-  </html>
+  </div>
+  {% else %}
+  <h3>No KML file detected, upload one here: <a href="{% url 'adminkml' %}">Admin KML</a></h3>
+  {% endif %}
+</body>
+</html>

@@ -8,6 +8,7 @@ header {
   width: 100%;
   height: 60px;
   background-color: gray;
+  margin-bottom: 12px;
 }
 nav {
   height: 100%
@@ -208,6 +209,20 @@ ul li a {
   border: 3px solid rgb(53, 174, 255);
 }
 #markers_container {
-  display: grid;
-  grid-template-columns: repeat(6, 90px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.groups_container_manual {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 48px;
+}
+.marker_container_manual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
