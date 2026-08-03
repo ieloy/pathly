@@ -4,6 +4,7 @@
 <head>
   <title>Hello, Pathly!</title>
   <link href="static/styles.css" rel="stylesheet">
+  <script src="static/main.js"></script>
 </head>
 
 <body>
@@ -19,28 +20,55 @@
       </ul>
     </nav>
   </header>
-  <div id="markers_container">
-    {% if places %}
-    <div class="groups_container_manual">
-      {% for marker_code, marker_data in places.items %}
-      <div class="marker_container_manual">
+  {% if places %}
+  <form id="manual_sorting_form">
+    <div id="markers_container">
+      <div class="groups_container_manual">
 
-        <div class="marker" style="--marker-color: {{ marker_data.color }};">
-          <img src="{{ marker_data.icon }}" alt="Marker Icon" class="marker-image">
+        {% for marker_code, marker_data in places.items %}
+        <div class="marker_container_manual">
+
+          <div class="marker" style="--marker-color: {{ marker_data.color }};">
+            <img src="{{ marker_data.icon }}" alt="Marker Icon" class="marker-image">
+          </div>
+          <div class="available locations">
+            <ul class="location_list">
+              {% for location in marker_data.locations %}
+              <li class="location_item">
+                <label>
+                  <input type="checkbox" value="{{ location }}" name="location" class="location_check">
+                  <span>{{ location }}</span>
+                </label>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+
         </div>
-
-        <ul class="location_list">
-          {% for location in marker_data.locations %}
-          <li>{{ location }}</li>
-          {% endfor %}
-        </ul>
+        {% endfor %}
 
       </div>
-      {% endfor %}
     </div>
-  </div>
+
+    <button type="button" id="add_to_group">Add to group</button>
+
+    <button type="button" id="remove_from_group">Remove from group</button>
+
+    <button type="button" id="add_group">Add new group</button>
+
+    <button type="submit">Submit</button>
+
+    <div id="created_groups">
+      
+
+    </div>
+
+
+  </form>
+
   {% else %}
   <h3>No KML file detected, upload one here: <a href="{% url 'adminkml' %}">Admin KML</a></h3>
   {% endif %}
 </body>
+
 </html>

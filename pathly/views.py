@@ -37,7 +37,7 @@ def about(request):
 def sorting(request):
   places = get_places(request)
   sorted_places = sort_locations(places)
-
+  
   return render(request, "pathly/sorting.html", {
     "places": sorted_places
   })

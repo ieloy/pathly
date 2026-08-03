@@ -3,6 +3,12 @@ addEventListener("DOMContentLoaded", (event) => {
   const uploadForm = document.getElementById("kml-upload-form");
   const addSpecButton = document.getElementById("add-spec-button");
   const specForm = document.getElementById("spec_form");
+  const addGroupButton = document.querySelector("#add_group");
+  const addToGroupButton = document.querySelector("#add_to_group");
+  const removeFromGroupButton = document.querySelector("#remove_from_group");
+
+  let activeGroup = null;
+  let groupCount = 0;
 
   if (uploadForm) {
   uploadForm.addEventListener("submit", uploadKml)
@@ -19,7 +25,78 @@ addEventListener("DOMContentLoaded", (event) => {
     specificationContainers.forEach(function(container) {
       setupSpecificationContainer(container);
     });
-  }    
+  } 
+  
+  if (addGroupButton) {
+    addGroupButton.addEventListener("click", () => {
+      groupCount++;
+
+      const createdGroups = document.getElementById("created_groups");
+      const newGroup = document.createElement("div");
+      const groupTitle = document.createElement("h3");
+      const groupList = document.createElement("ul");
+
+      newGroup.classList.add("manual_group");
+      groupList.classList.add("group_location_list");
+      groupTitle.textContent = `Group ${groupCount}`;
+
+      newGroup.append(groupTitle, groupList);
+      createdGroups.appendChild(newGroup);
+
+      activeGroup = groupList;
+    });
+  }
+
+  if (addToGroupButton) {
+    addToGroupButton.addEventListener("click", () => {
+      if (!activeGroup) {
+        alert("Please create a group first.");
+        return;
+      }
+
+      const selectedLocations = document.querySelectorAll(".location_check:checked");
+
+      selectedLocations.forEach((checkbox) => {
+        const locationItem = checkbox.closest(".location_item");
+        const allOriginalLists = Array.from(document.querySelectorAll(".location_list"));
+        const originalContainer = locationItem.closest(".location_list");
+
+        locationItem.dataset.originalListIndex =
+        allOriginalLists.indexOf(originalContainer);
+
+        checkbox.checked = false;
+        activeGroup.appendChild(locationItem);
+      })
+    })
+    }
+  
+  if (removeFromGroupButton) {
+    removeFromGroupButton.addEventListener("click", () => {
+      const selectedLocations = document.querySelectorAll(".group_location_list .location_check:checked");
+
+      const allOriginalLists = document.querySelectorAll(".location_list");
+
+      selectedLocations.forEach((checkbox) => {
+        const locationItem = checkbox.closest(".location_item");
+
+        const originalListIndex = Number(
+          locationItem.dataset.originalListIndex
+        );
+
+        const originalContainer = allOriginalLists[originalListIndex];
+
+        if (!originalContainer) {
+          return;
+        }
+
+        checkbox.checked = false;
+        originalContainer.appendChild(locationItem);
+      
+      })
+    })
+  }
+
+
 });
 
 
