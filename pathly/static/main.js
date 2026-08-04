@@ -1,15 +1,18 @@
 addEventListener("DOMContentLoaded", (event) => {
   
+  // creating variables for the elements
   const uploadForm = document.getElementById("kml-upload-form");
   const addSpecButton = document.getElementById("add-spec-button");
   const specForm = document.getElementById("spec_form");
   const addGroupButton = document.querySelector("#add_group");
   const addToGroupButton = document.querySelector("#add_to_group");
   const removeFromGroupButton = document.querySelector("#remove_from_group");
+  const submitManualForm = document.querySelector("#manual_sorting_button");
 
   let activeGroup = null;
   let groupCount = 0;
 
+  // submitting forms
   if (uploadForm) {
   uploadForm.addEventListener("submit", uploadKml)
   }
@@ -18,6 +21,7 @@ addEventListener("DOMContentLoaded", (event) => {
   addSpecButton.addEventListener("click", addSpecification)
   }
 
+  // specification event handler
   if (specForm) {
     document.getElementById("spec_form").addEventListener("submit", handleSpecifications)
     
@@ -27,6 +31,7 @@ addEventListener("DOMContentLoaded", (event) => {
     });
   } 
   
+  // gorup button event handlers
   if (addGroupButton) {
     addGroupButton.addEventListener("click", () => {
       groupCount++;
@@ -35,14 +40,16 @@ addEventListener("DOMContentLoaded", (event) => {
       const newGroup = document.createElement("div");
       const groupTitle = document.createElement("h3");
       const groupList = document.createElement("ul");
-
+      
       newGroup.classList.add("manual_group");
       groupList.classList.add("group_location_list");
+      groupList.setAttribute("id", `group_${groupCount}`);
       groupTitle.textContent = `Group ${groupCount}`;
 
       newGroup.append(groupTitle, groupList);
       createdGroups.appendChild(newGroup);
 
+      // make activeGroup the currently created group so newly added locations go there
       activeGroup = groupList;
     });
   }
@@ -61,6 +68,7 @@ addEventListener("DOMContentLoaded", (event) => {
         const allOriginalLists = Array.from(document.querySelectorAll(".location_list"));
         const originalContainer = locationItem.closest(".location_list");
 
+        // store original list where the location belongs, so remove button works
         locationItem.dataset.originalListIndex =
         allOriginalLists.indexOf(originalContainer);
 
@@ -79,6 +87,7 @@ addEventListener("DOMContentLoaded", (event) => {
       selectedLocations.forEach((checkbox) => {
         const locationItem = checkbox.closest(".location_item");
 
+        // find original list where location belongs
         const originalListIndex = Number(
           locationItem.dataset.originalListIndex
         );
@@ -91,15 +100,16 @@ addEventListener("DOMContentLoaded", (event) => {
 
         checkbox.checked = false;
         originalContainer.appendChild(locationItem);
-      
       })
     })
   }
-
+  if (submitManualForm) {
+    submitManualForm.addEventListener("click", sortManualGroups);
+  }
 
 });
 
-
+// function to handle uploaded KML file
 async function uploadKml(event) {
   event.preventDefault();
 
@@ -119,6 +129,7 @@ async function uploadKml(event) {
   const data = await response.json();
   }
 
+// function to add specification
 function addSpecification(event) {
   event.preventDefault();
   const specificationsContainer = document.getElementById("spec_parent_container");
@@ -129,6 +140,7 @@ function addSpecification(event) {
   setupSpecificationContainer(copiedSpec);
 }
 
+// function to handle specification on the backend
 async function handleSpecifications(event) {
   event.preventDefault();
   const specificationContainers =
@@ -233,3 +245,29 @@ function updateSpecificationOptions(container) {
   }
 
 }
+
+async function sortManualGroups(event) {
+  event.preventDefault();
+
+  const csrftoken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+  const groupParent = document.getElementById("created_groups");
+  
+  groupParent.querySelectorAll(".manual_group").forEach((group) => {
+    const groupId = group.querySelector(".group_location_list").getAttribute("id");
+    const locationIds = group.querySelectorAll(".group_location_list .location_item");
+
+    fetch(`sort_manually/${groupId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": application/json,
+        "X-CSRFToken": csrftoken,
+      },
+      body: JSON.stringify({
+        locationIds: locationIds,
+      })
+    });
+  });
+  const data = await response.json();
+}
+
+

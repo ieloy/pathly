@@ -343,7 +343,14 @@ def sort_locations(places):
     sorted_places[marker_code]["locations"].append(place)
 
   return sorted_places
+
+def sort_manually(request, group_id):
+  if request.method == "POST":
+    pass
+
       
+
+# Internal functions
 def get_places(request):
   return request.session.get("places")
 
