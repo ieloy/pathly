@@ -21,7 +21,7 @@
     </nav>
   </header>
   {% if places %}
-  <form id="manual_sorting_form" method="post" action="{% url 'sort_manually' %}">
+  <form id="manual_sorting_form" method="post">
     {% csrf_token %}
     <div id="markers_container">
       <div class="groups_container_manual">

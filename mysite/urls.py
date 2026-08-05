@@ -14,6 +14,6 @@ urlpatterns = [
     path("handle_specifications", views.handle_specifications, name="handle_specifications"),
     path("apply_specifications", views.apply_specifications, name="apply_specifications"),
     path("manual_sorting", views.manual_sorting, name="manual_sorting"),
-    path("sort_manually/<int:group_id>", views.sort_manually, name="sort_manually"),
+    path("sort_manually", views.sort_manually, name="sort_manually"),
     path("admin/", admin.site.urls),
 ]

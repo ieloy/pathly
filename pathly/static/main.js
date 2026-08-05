@@ -250,24 +250,33 @@ async function sortManualGroups(event) {
   event.preventDefault();
 
   const csrftoken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
-  const groupParent = document.getElementById("created_groups");
   
-  groupParent.querySelectorAll(".manual_group").forEach((group) => {
-    const groupId = group.querySelector(".group_location_list").getAttribute("id");
-    const locationIds = group.querySelectorAll(".group_location_list .location_item");
+  const groups = Array.from(
+    document.querySelectorAll(".manual_group")).map((group) => {
+      const groupList = group.querySelector(".group_location_list");
+      
+      const locationIds = Array.from(
+        groupList.querySelectorAll(".location_check")).map((checkbox) => checkbox.value);
 
-    fetch(`sort_manually/${groupId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": application/json,
-        "X-CSRFToken": csrftoken,
-      },
-      body: JSON.stringify({
+      return {
+        groupId: groupList.id,
         locationIds: locationIds,
-      })
+      };    
     });
+  
+  const response = await fetch("sort_manually", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrftoken,
+    },
+    body: JSON.stringify({
+      groups: groups,
+    }),
   });
+
   const data = await response.json();
+  console.log(data);
 }
 
 

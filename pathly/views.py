@@ -344,9 +344,11 @@ def sort_locations(places):
 
   return sorted_places
 
-def sort_manually(request, group_id):
+def sort_manually(request):
   if request.method == "POST":
-    pass
+    data = json.loads(request.body)
+    print(data)
+    return JsonResponse("success", safe=False)
 
       
 
