@@ -8,6 +8,7 @@ addEventListener("DOMContentLoaded", (event) => {
   const addToGroupButton = document.querySelector("#add_to_group");
   const removeFromGroupButton = document.querySelector("#remove_from_group");
   const submitManualForm = document.querySelector("#manual_sorting_button");
+  const routesForm = document.querySelector("#routes_form");
 
   let activeGroup = null;
   let groupCount = 0;
@@ -107,7 +108,13 @@ addEventListener("DOMContentLoaded", (event) => {
     submitManualForm.addEventListener("click", sortManualGroups);
   }
 
+  if (routesForm) {
+    routesForm.addEventListener("submit", handleRoutesForm);
+  }
+
 });
+
+
 
 // function to handle uploaded KML file
 async function uploadKml(event) {
@@ -284,4 +291,7 @@ async function sortManualGroups(event) {
   }
 }
 
+function handleRoutesForm {
+  // TODO
+}
 

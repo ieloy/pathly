@@ -1,33 +1,55 @@
 <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <title>Hello, Pathly!</title>
-    <link href="static/styles.css" rel="stylesheet">
-  </head>
-  <body>
-    <header>
-      <nav>
-        <ul>
-          <li><a href="{% url 'index' %}">Home</a></li>
-          <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
-          <li><a href="{% url 'routes' %}">Routes</a></li>
-          <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
-          <li><a href="{% url 'sorting' %}">Sorting</a></li>
-          <li><a href="{% url 'about' %}">About</a></li>
-        </ul>
-      </nav>
-    </header>
-    <h1>Routes</h1>
-    <h3>View the most optimal routing here.</h3>
-    {% if places %}
-      {% for location in places %}
-        <h1>{{ location }}</h1>
-      {% endfor %}
+<html lang="en">
+
+<head>
+  <title>Hello, Pathly!</title>
+  <link href="static/styles.css" rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li><a href="{% url 'mapinfo' %}">Mapinfo</a></li>
+        <li><a href="{% url 'routes' %}">Routes</a></li>
+        <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
+        <li><a href="{% url 'sorting' %}">Sorting</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+      </ul>
+    </nav>
+  </header>
+  <h1>Routes</h1>
+  <h3>View the most optimal routing here.</h3>
+  {% if places %}
+  <div id="routes_groups">
+    {% for group_name, locations in places.items %}
+    <div class="route_group">
+      <h3>{{ group_name }}</h3>
+      <ul class="route_locations">
+        {% for location in locations %}
+        <li>{{ location.name }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </div>
+  <div id="routes_select">
+    <form id="routes_form">
+      <h4>Select group to calculate route:</h4>
+      <select>
+        {% for group_name, locations in places.items %}
+        <option value="{{ group_name }}">{{ group_name }}</option>
+        {% endfor %}
+        <input type="submit" value="Confirm">
+      </select>
+    </form>
+  </div>
 
 
+  {% else %}
+  <p>No KML file detected, upload one here: <a href="{% url 'adminkml' %}">Admin KML</a></p>
+  {% endif %}
+</body>
 
-    {% else %}
-      <p>No KML file detected, upload one here: <a href="{% url 'adminkml' %}">Admin KML</a></p>
-    {% endif %}
-    </body>
-  </html>
+</html>

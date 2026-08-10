@@ -15,8 +15,18 @@ def index(request):
   })
 
 def routes(request):
-  sorted_groups = request.session.get("sorted_groups")
+  groups = request.session.get("sorted_groups")
+  locations_by_id = get_locations_by_id(get_places(request))
 
+  sorted_groups = {}
+
+  for i in range(len(groups)):
+    location_list = []
+    for location in list(groups.values())[i]:
+      location_list.append(locations_by_id[int(location)])
+      
+    sorted_groups[f"Group {i + 1}"] = location_list
+  
   return render(request, "pathly/routes.html", {
     "places": sorted_groups
   })
