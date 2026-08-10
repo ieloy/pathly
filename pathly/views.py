@@ -15,10 +15,10 @@ def index(request):
   })
 
 def routes(request):
-  places = get_places(request)
+  sorted_groups = request.session.get("sorted_groups")
 
   return render(request, "pathly/routes.html", {
-    "places": places
+    "places": sorted_groups
   })
 
 def mapinfo(request):
@@ -119,6 +119,7 @@ def handle_kml(request):
     placemarks = root.findall(".//kml:Placemark", ns)
 
     # Check placemarks in the KML file and store their data in a dict
+    location_id = 0
     for placemark in placemarks[0:25]:
       name = placemark.find("kml:name", ns)
       coordinates = placemark.find(".//kml:coordinates", ns)
@@ -139,8 +140,11 @@ def handle_kml(request):
         f"{lat},{lon}", 
         style_url_text,
         icon_url,
-        icon_color
+        icon_color,
+        location_id
       ]
+
+      location_id += 1
       
     # Find relevant extra info for each place
     places_extra_info = find_location_info(places)
@@ -164,7 +168,7 @@ def handle_specifications(request):
     group_amount = int(data.get("groupAmount"))
 
     # Apply specifications to the places and create the groups
-    groups = apply_specifications(get_places(request), specifications, group_amount)
+    groups = apply_specifications(request, get_places(request), specifications, group_amount)
     print(groups)
 
     return JsonResponse({
@@ -175,11 +179,12 @@ def handle_specifications(request):
   else:
     return JsonResponse({"success": False, "error": "Invalid request method."})
   
-def apply_specifications(places, specifications, group_amount):
+def apply_specifications(request, places, specifications, group_amount):
   locations = []
 
   for name, place_data in places.items():
     locations.append({
+      "id": place_data[4],
       "name": name,
       "coordinates": place_data[0],
       "marker": place_data[1]
@@ -190,6 +195,19 @@ def apply_specifications(places, specifications, group_amount):
 
   # Create groups based on specifications
   valid_groups = create_groups(locations, specifications, group_amount)
+
+  # If there are still invalid locations, retry to add them in groups (TODO)
+
+  # Store the sorted groups in the session for easier access
+  sorted_groups = {}
+
+  for index, group in enumerate(valid_groups, start=1):
+    sorted_groups[f"group{index}"] = [
+      location["id"]
+      for location in group
+    ]
+
+  request.session["sorted_groups"] = sorted_groups
 
   return valid_groups
 
@@ -334,23 +352,42 @@ def sort_locations(places):
   for place, place_data in places.items():
     marker_code = place_data[1]
 
+    # add new marker code to the dict if that marker code isn't already present
     if marker_code not in sorted_places:
       sorted_places[marker_code] = {
         "icon": place_data[2],
         "color": f"#{place_data[3]}",
-        "locations": []
+        "locations": [],
       }
-    sorted_places[marker_code]["locations"].append(place)
+    sorted_places[marker_code]["locations"].append({
+      "name": place,
+      "id": place_data[4]
+    })
 
   return sorted_places
 
 def sort_manually(request):
   if request.method == "POST":
     data = json.loads(request.body)
-    print(data)
-    return JsonResponse("success", safe=False)
 
+    groups = data.get("groups", [])
+
+    manual_groups = {}
+
+    for group in groups:
+      group_id = group["groupId"]
+      locations = group["locationIds"]
+
+      manual_groups[group_id] = locations
+
+    print(manual_groups)
+
+    request.session["sorted_groups"] = manual_groups
       
+    return JsonResponse("success", safe=False)
+  
+  else:
+    return JsonResponse({"success": False, "error": "Invalid request method."})
 
 # Internal functions
 def get_places(request):
@@ -393,3 +430,18 @@ def find_location_info(places):
     places_extra_info[place] = city, province, postcode
   
   return places_extra_info
+
+def get_locations_by_id(places):
+  locations_by_id = {}
+
+  for name, place_data in places.items():
+    location_id = place_data[4]
+    locations_by_id[location_id] = {
+      "name": name,
+      "coordinates": place_data[0],
+      "marker": place_data[1],
+      "marker_icon": place_data[2],
+      "marker_color": place_data[3]
+    }
+
+  return locations_by_id

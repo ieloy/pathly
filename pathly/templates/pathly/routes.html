@@ -20,7 +20,12 @@
     <h1>Routes</h1>
     <h3>View the most optimal routing here.</h3>
     {% if places %}
-      <p>Kml file gedetecteerd</p>
+      {% for location in places %}
+        <h1>{{ location }}</h1>
+      {% endfor %}
+
+
+
     {% else %}
       <p>No KML file detected, upload one here: <a href="{% url 'adminkml' %}">Admin KML</a></p>
     {% endif %}

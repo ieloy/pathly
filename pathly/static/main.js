@@ -276,7 +276,12 @@ async function sortManualGroups(event) {
   });
 
   const data = await response.json();
-  console.log(data);
+  if (data === "success") {
+    console.log("success")
+    document.querySelector("#manual_sorting_form").style.display = "none";
+    document.getElementById("finished_grouping").style.display = "block";
+    alert("Groups sorted successfully! Head on to routes.");
+  }
 }
 
 

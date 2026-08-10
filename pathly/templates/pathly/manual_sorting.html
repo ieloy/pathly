@@ -37,8 +37,8 @@
               {% for location in marker_data.locations %}
               <li class="location_item">
                 <label>
-                  <input type="checkbox" value="{{ location }}" name="location" class="location_check">
-                  <span>{{ location }}</span>
+                  <input type="checkbox" value="{{ location.id }}" name="location" class="location_check">
+                  <span>{{ location.name }}</span>
                 </label>
               </li>
               {% endfor %}
@@ -64,6 +64,8 @@
 
 
   </form>
+
+  <h3 style="display:none;" id="finished_grouping">Groups sorted successfully! Head over to <a href="{% url 'routes' %}">Routes</a></h3>
 
   {% else %}
   <h3>No KML file detected, upload one here: <a href="{% url 'adminkml' %}">Admin KML</a></h3>
