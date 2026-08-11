@@ -15,5 +15,6 @@ urlpatterns = [
     path("apply_specifications", views.apply_specifications, name="apply_specifications"),
     path("manual_sorting", views.manual_sorting, name="manual_sorting"),
     path("sort_manually", views.sort_manually, name="sort_manually"),
+    path("calculate_route", views.calculate_route, name="calculate_route"),
     path("admin/", admin.site.urls),
 ]

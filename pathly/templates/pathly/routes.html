@@ -4,6 +4,7 @@
 <head>
   <title>Hello, Pathly!</title>
   <link href="static/styles.css" rel="stylesheet">
+  <script src="static/main.js"></script>
 </head>
 
 <body>
@@ -23,11 +24,11 @@
   <h3>View the most optimal routing here.</h3>
   {% if places %}
   <div id="routes_groups">
-    {% for group_name, locations in places.items %}
+    {% for name, group_data in places.items %}
     <div class="route_group">
-      <h3>{{ group_name }}</h3>
+      <h3>{{ group_data.name }}</h3>
       <ul class="route_locations">
-        {% for location in locations %}
+        {% for location in group_data.locations %}
         <li>{{ location.name }}</li>
         {% endfor %}
       </ul>
@@ -36,10 +37,11 @@
   </div>
   <div id="routes_select">
     <form id="routes_form">
+      {% csrf_token %}
       <h4>Select group to calculate route:</h4>
-      <select>
-        {% for group_name, locations in places.items %}
-        <option value="{{ group_name }}">{{ group_name }}</option>
+      <select id="routes_chosen">
+        {% for group_key, group_data in places.items %}
+        <option value="{{ group_key }}">{{ group_data.name }}</option>
         {% endfor %}
         <input type="submit" value="Confirm">
       </select>

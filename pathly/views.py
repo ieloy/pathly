@@ -20,12 +20,19 @@ def routes(request):
 
   sorted_groups = {}
 
-  for i in range(len(groups)):
+  for index, (group_key, location_ids) in enumerate(groups.items(), start=1):
     location_list = []
-    for location in list(groups.values())[i]:
-      location_list.append(locations_by_id[int(location)])
-      
-    sorted_groups[f"Group {i + 1}"] = location_list
+
+    for location_id in location_ids:
+      location_list.append(
+        locations_by_id[int(location_id)]
+      )
+    
+    sorted_groups[group_key] = {
+      "name": f"Group {index}",
+      "locations": location_list
+    }
+
   
   return render(request, "pathly/routes.html", {
     "places": sorted_groups
@@ -398,6 +405,26 @@ def sort_manually(request):
   
   else:
     return JsonResponse({"success": False, "error": "Invalid request method."})
+
+def calculate_route(request):
+  chosen_group = json.loads(request.body)["chosenGroup"]
+  print(chosen_group)
+
+  associated_locations_ids = request.session["sorted_groups"][chosen_group]
+  
+  locations_by_id = get_locations_by_id(get_places(request))
+
+  associated_locations = []
+
+  for location_id in associated_locations_ids:
+    location = locations_by_id.get(int(location_id))
+
+    if location:
+      associated_locations.append(location)
+
+  print(associated_locations)
+
+  return JsonResponse("success", safe=False)
 
 # Internal functions
 def get_places(request):

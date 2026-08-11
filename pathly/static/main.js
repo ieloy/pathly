@@ -291,7 +291,22 @@ async function sortManualGroups(event) {
   }
 }
 
-function handleRoutesForm {
-  // TODO
+function handleRoutesForm(event) {
+  event.preventDefault()
+
+  const chosenGroup = document.getElementById("routes_chosen").value;
+  const csrftoken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+  console.log(chosenGroup)
+
+  fetch("calculate_route", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrftoken
+    },
+    body: JSON.stringify({
+      chosenGroup: chosenGroup
+    })
+  })
 }
 
