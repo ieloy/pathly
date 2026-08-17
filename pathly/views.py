@@ -6,6 +6,8 @@ import xml.etree.ElementTree as ET
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from dotenv import load_dotenv
+from google.maps import routing_v2
+
 
 # Create your views here.
 def index(request):
@@ -17,6 +19,7 @@ def index(request):
 def routes(request):
   groups = request.session.get("sorted_groups")
   locations_by_id = get_locations_by_id(get_places(request))
+  api_key = get_credentials()
 
   sorted_groups = {}
 
@@ -30,12 +33,12 @@ def routes(request):
     
     sorted_groups[group_key] = {
       "name": f"Group {index}",
-      "locations": location_list
+      "locations": location_list,
     }
 
-  
   return render(request, "pathly/routes.html", {
-    "places": sorted_groups
+    "places": sorted_groups,
+    "api_key": api_key
   })
 
 def mapinfo(request):
@@ -407,8 +410,12 @@ def sort_manually(request):
     return JsonResponse({"success": False, "error": "Invalid request method."})
 
 def calculate_route(request):
-  chosen_group = json.loads(request.body)["chosenGroup"]
-  print(chosen_group)
+  data = json.loads(request.body)
+  chosen_group = data["chosenGroup"]
+
+  origin = data["origin"]
+  destination = data["destination"]
+
 
   associated_locations_ids = request.session["sorted_groups"][chosen_group]
   
@@ -422,7 +429,26 @@ def calculate_route(request):
     if location:
       associated_locations.append(location)
 
-  print(associated_locations)
+  relevant_associated_locations = []
+
+  for i in range(len(associated_locations)):
+    name = associated_locations[i]["name"]
+    coords = associated_locations[i]["coordinates"]
+    lat, lng = coords.split(",")
+
+    location_data = {
+      "name": name,
+      "lat": float(lat),
+      "lng": float(lng)
+    }
+
+    relevant_associated_locations.append(location_data)
+
+  route_data = {
+    "origin": origin,
+    "destination": destination,
+    "intermediates": relevant_associated_locations
+  }
 
   return JsonResponse("success", safe=False)
 

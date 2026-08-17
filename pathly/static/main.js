@@ -1,5 +1,9 @@
+// variables for origin and destination in routes
+let selectedOrigin = null;
+let selectedDestination = null;
+
 addEventListener("DOMContentLoaded", (event) => {
-  
+
   // creating variables for the elements
   const uploadForm = document.getElementById("kml-upload-form");
   const addSpecButton = document.getElementById("add-spec-button");
@@ -10,28 +14,29 @@ addEventListener("DOMContentLoaded", (event) => {
   const submitManualForm = document.querySelector("#manual_sorting_button");
   const routesForm = document.querySelector("#routes_form");
 
+
   let activeGroup = null;
   let groupCount = 0;
 
   // submitting forms
   if (uploadForm) {
-  uploadForm.addEventListener("submit", uploadKml)
+    uploadForm.addEventListener("submit", uploadKml)
   }
 
   if (addSpecButton) {
-  addSpecButton.addEventListener("click", addSpecification)
+    addSpecButton.addEventListener("click", addSpecification)
   }
 
   // specification event handler
   if (specForm) {
     document.getElementById("spec_form").addEventListener("submit", handleSpecifications)
-    
+
     const specificationContainers = document.querySelectorAll(".specifications_container");
-    specificationContainers.forEach(function(container) {
+    specificationContainers.forEach(function (container) {
       setupSpecificationContainer(container);
     });
-  } 
-  
+  }
+
   // gorup button event handlers
   if (addGroupButton) {
     addGroupButton.addEventListener("click", () => {
@@ -41,7 +46,7 @@ addEventListener("DOMContentLoaded", (event) => {
       const newGroup = document.createElement("div");
       const groupTitle = document.createElement("h3");
       const groupList = document.createElement("ul");
-      
+
       newGroup.classList.add("manual_group");
       groupList.classList.add("group_location_list");
       groupList.setAttribute("id", `group_${groupCount}`);
@@ -71,14 +76,14 @@ addEventListener("DOMContentLoaded", (event) => {
 
         // store original list where the location belongs, so remove button works
         locationItem.dataset.originalListIndex =
-        allOriginalLists.indexOf(originalContainer);
+          allOriginalLists.indexOf(originalContainer);
 
         checkbox.checked = false;
         activeGroup.appendChild(locationItem);
       })
     })
-    }
-  
+  }
+
   if (removeFromGroupButton) {
     removeFromGroupButton.addEventListener("click", () => {
       const selectedLocations = document.querySelectorAll(".group_location_list .location_check:checked");
@@ -114,8 +119,6 @@ addEventListener("DOMContentLoaded", (event) => {
 
 });
 
-
-
 // function to handle uploaded KML file
 async function uploadKml(event) {
   event.preventDefault();
@@ -134,7 +137,7 @@ async function uploadKml(event) {
     }
   });
   const data = await response.json();
-  }
+}
 
 // function to add specification
 function addSpecification(event) {
@@ -163,7 +166,7 @@ async function handleSpecifications(event) {
     const combineAmount = container.querySelector('[name="combi_with_amount"]').value;
     const cap = container.querySelector('[name="spec_cap"]').checked;
     const capAmount = container.querySelector('[name="cap_amount"]').value;
-    
+
     specifications.push({
       marker: marker,
       markerAmount: markerAmount,
@@ -186,29 +189,29 @@ async function handleSpecifications(event) {
     },
     body: JSON.stringify({
       specifications,
-      groupAmount
+      groupAmount,
     })
-    });
+  });
 
-    const data = await response.json();
-    console.log("Reponse", data.groups);
-   
-  }
+  const data = await response.json();
+  console.log("Reponse", data.groups);
+
+}
 
 function setupSpecificationContainer(container) {
   const markerSelect = container.querySelector('[name="marker"]');
   const forbiddenSelect = container.querySelector('[name="no_combi_with"]');
   const combineSelect = container.querySelector('[name="combi_with"]');
 
-  markerSelect.addEventListener("change", function() {
+  markerSelect.addEventListener("change", function () {
     updateSpecificationOptions(container);
   });
 
-  forbiddenSelect.addEventListener("change", function() {
+  forbiddenSelect.addEventListener("change", function () {
     updateSpecificationOptions(container);
   });
 
-  combineSelect.addEventListener("change", function() {
+  combineSelect.addEventListener("change", function () {
     updateSpecificationOptions(container);
   });
 
@@ -230,14 +233,14 @@ function updateSpecificationOptions(container) {
     const isCombinedMarker = option.value === combineMarker;
 
     option.disabled = option.value !== "" &&
-    (isOwnMarker || isCombinedMarker)
+      (isOwnMarker || isCombinedMarker)
   });
 
   Array.from(combineSelect.options).forEach((option) => {
     const isForbiddenMarker = option.value === forbiddenMarker;
 
     option.disabled = option.value !== "" &&
-    isForbiddenMarker;
+      isForbiddenMarker;
   });
 
   if (
@@ -257,20 +260,20 @@ async function sortManualGroups(event) {
   event.preventDefault();
 
   const csrftoken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
-  
+
   const groups = Array.from(
     document.querySelectorAll(".manual_group")).map((group) => {
       const groupList = group.querySelector(".group_location_list");
-      
+
       const locationIds = Array.from(
         groupList.querySelectorAll(".location_check")).map((checkbox) => checkbox.value);
 
       return {
         groupId: groupList.id,
         locationIds: locationIds,
-      };    
+      };
     });
-  
+
   const response = await fetch("sort_manually", {
     method: "POST",
     headers: {
@@ -296,7 +299,11 @@ function handleRoutesForm(event) {
 
   const chosenGroup = document.getElementById("routes_chosen").value;
   const csrftoken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
-  console.log(chosenGroup)
+
+  if (!selectedOrigin || !selectedDestination) {
+    alert("Select an origin and destination first!");
+    return;
+  }
 
   fetch("calculate_route", {
     method: "POST",
@@ -305,8 +312,50 @@ function handleRoutesForm(event) {
       "X-CSRFToken": csrftoken
     },
     body: JSON.stringify({
-      chosenGroup: chosenGroup
+      chosenGroup: chosenGroup,
+      origin: selectedOrigin,
+      destination: selectedDestination
     })
   })
 }
 
+async function initializeAutocomplete() {
+  console.log("functie loaded")
+  const originAutocomplete = new google.maps.places.PlaceAutocompleteElement();
+  const destAutocomplete = new google.maps.places.PlaceAutocompleteElement();
+
+
+  document.getElementById("origin_autocomplete").appendChild(originAutocomplete);
+  document.getElementById("destination_autocomplete").appendChild(destAutocomplete);
+
+  originAutocomplete.addEventListener(
+    'gmp-select',
+    async ({ placePrediction }) => {
+      const place = placePrediction.toPlace();
+      await place.fetchFields({
+        fields: ['displayName', 'formattedAddress', 'location'],
+      });
+      selectedOrigin = {
+        name: place.displayName,
+        address: place.formattedAddress,
+        coordinates: place.location.toJSON(),
+      };
+      console.log(selectedOrigin)
+    }
+  );
+
+  destAutocomplete.addEventListener(
+    'gmp-select',
+    async ({ placePrediction }) => {
+      const place = placePrediction.toPlace();
+      await place.fetchFields({
+        fields: ['displayName', 'formattedAddress', 'location'],
+      });
+      selectedDestination = {
+        name: place.displayName,
+        address: place.formattedAddress,
+        coordinates: place.location.toJSON(),
+      };
+    }
+  );
+}

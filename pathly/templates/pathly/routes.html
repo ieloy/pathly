@@ -4,7 +4,12 @@
 <head>
   <title>Hello, Pathly!</title>
   <link href="static/styles.css" rel="stylesheet">
-  <script src="static/main.js"></script>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&loading=async&libraries=places&callback=initializeAutocomplete">
+    async
+    defer
+  </script>
+  <script src="static/main.js" defer></script>
 </head>
 
 <body>
@@ -43,8 +48,14 @@
         {% for group_key, group_data in places.items %}
         <option value="{{ group_key }}">{{ group_data.name }}</option>
         {% endfor %}
-        <input type="submit" value="Confirm">
       </select>
+      <div id="origin_autocomplete">
+        <label>Select origin:</label>
+      </div>
+      <div id="destination_autocomplete">
+        <label>Select desination:</label>
+      </div>
+      <input type="submit" value="Confirm">
     </form>
   </div>
 
