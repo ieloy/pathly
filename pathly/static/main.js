@@ -294,7 +294,7 @@ async function sortManualGroups(event) {
   }
 }
 
-function handleRoutesForm(event) {
+async function handleRoutesForm(event) {
   event.preventDefault()
 
   const chosenGroup = document.getElementById("routes_chosen").value;
@@ -305,7 +305,7 @@ function handleRoutesForm(event) {
     return;
   }
 
-  fetch("calculate_route", {
+  const response = await fetch("calculate_route", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -316,11 +316,14 @@ function handleRoutesForm(event) {
       origin: selectedOrigin,
       destination: selectedDestination
     })
-  })
+  });
+
+  const routeData = await response.json();
+
+  displayRoute(routeData)
 }
 
 async function initializeAutocomplete() {
-  console.log("functie loaded")
   const originAutocomplete = new google.maps.places.PlaceAutocompleteElement();
   const destAutocomplete = new google.maps.places.PlaceAutocompleteElement();
 
@@ -340,7 +343,6 @@ async function initializeAutocomplete() {
         address: place.formattedAddress,
         coordinates: place.location.toJSON(),
       };
-      console.log(selectedOrigin)
     }
   );
 
@@ -358,4 +360,23 @@ async function initializeAutocomplete() {
       };
     }
   );
+}
+
+function displayRoute(routeData) {
+  const path = google.maps.geometry.encoding.decodePath(
+    routeData.polyline
+  );
+  const map = new google.maps.Map(
+    document.getElementById("route_map"),
+    {
+      zoom: 10,
+      center: routeData.origin.coordinates
+    }
+  );
+
+    const routePolyline = new google.maps.Polyline({
+      path: path
+  });
+
+  routePolyline.setMap(map);
 }

@@ -251,3 +251,7 @@ ul li a {
   flex-direction: column;
   justify-content: center;
 }
+#route_map {
+  width: 80%;
+  height: 500px;
+}

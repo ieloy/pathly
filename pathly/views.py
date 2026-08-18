@@ -416,6 +416,18 @@ def calculate_route(request):
   origin = data["origin"]
   destination = data["destination"]
 
+  url = "https://routes.googleapis.com/directions/v2:computeRoutes"
+
+  headers = {
+     "Content-Type": "application/json",
+     "X-Goog-Api-Key": get_credentials(),
+     "X-Goog-FieldMask": (
+       "routes.duration,"
+       "routes.distanceMeters,"
+       "routes.optimizedIntermediateWaypointIndex,"
+       "routes.polyline.encodedPolyline"
+     )
+   }
 
   associated_locations_ids = request.session["sorted_groups"][chosen_group]
   
@@ -432,25 +444,69 @@ def calculate_route(request):
   relevant_associated_locations = []
 
   for i in range(len(associated_locations)):
-    name = associated_locations[i]["name"]
     coords = associated_locations[i]["coordinates"]
     lat, lng = coords.split(",")
 
     location_data = {
-      "name": name,
-      "lat": float(lat),
-      "lng": float(lng)
+      "location": {
+        "latLng": {
+          "latitude": lat,
+          "longitude": lng
+        }
+      }
     }
 
     relevant_associated_locations.append(location_data)
 
-  route_data = {
-    "origin": origin,
-    "destination": destination,
-    "intermediates": relevant_associated_locations
+  google_route_data = {
+    "origin": {
+      "location": {
+        "latLng": {
+          "latitude": origin["coordinates"]["lat"],
+          "longitude": origin["coordinates"]["lng"]
+        }
+      }
+    },
+    "destination": {
+      "location": {
+        "latLng": {
+          "latitude": destination["coordinates"]["lat"],
+          "longitude": destination["coordinates"]["lng"]
+        }
+      }
+    },
+    "intermediates": [],
+
+    "travelMode": "DRIVE",
+    "optimizeWaypointOrder": True
   }
 
-  return JsonResponse("success", safe=False)
+  google_route_data["intermediates"] = (relevant_associated_locations)
+
+  response = requests.post(
+    url,
+    headers = headers,
+    json=google_route_data
+  )
+
+  result = response.json()
+
+  optimized_indexes = result["routes"][0]["optimizedIntermediateWaypointIndex"]
+
+  optimized_locations = [
+    associated_locations[i]
+    for i in optimized_indexes
+  ]
+  route_result = {
+    "origin": origin,
+    "destination": destination,
+    "intermediates": optimized_locations,
+    "polyline": result["routes"][0]["polyline"]["encodedPolyline"],
+    "distance": result["routes"][0]["distanceMeters"],
+    "duration": result["routes"][0]["duration"],
+  }
+
+  return JsonResponse(route_result)
 
 # Internal functions
 def get_places(request):
