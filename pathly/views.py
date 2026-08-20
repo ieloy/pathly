@@ -11,10 +11,38 @@ from google.maps import routing_v2
 
 # Create your views here.
 def index(request):
-  places = get_places(request)
-  return render(request, "pathly/index.html", {
-    "places": places
-  })
+  if request.user.is_authenticated:
+    places = get_places(request)
+    return render(request, "pathly/index.html", {
+      "places": places
+    })
+  else:
+    return render(request, "pathly/register.html")
+  
+def register(request):
+  if request.method == "POST":
+    username = request.POST["username"]
+    password = request.POST["password"]
+    confirm_password = request.POST["confirm_password"]
+    print(password)
+    print(confirm_password)
+
+    if password != confirm_password:
+      print("no matcho")
+      return render(request, "pathly/register.html", {
+        "message": "Passwords must match"
+      })
+    
+    print("match")
+
+    return render(request, "pathly/login.html")
+  
+  else:
+    return render(request, "pathly/register.html")
+
+
+def login(request):
+  return render(request, "pathly/login.html")
 
 def routes(request):
   groups = request.session.get("sorted_groups")

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Hello, Pathly!</title>
+  <link href="static/styles.css" rel="stylesheet">
+  <script src="static/main.js"></script>
+</head>
+
+<body>
+  <header>
+    <nav>
+
+    </nav>
+  </header>
+    <h1>Login</h1>
+    <form id="register_form">
+      <input type="text" name="username" placeholder="Username" autofocus>
+      <input type="password" name="password" placeholder="Password">
+      <input type="submit" value="submit">
+    </form>
+    <h3>No login yet? Visit <a href="{% url 'register' %}">register</a> first</h3>
+</body>
+
+</html>
