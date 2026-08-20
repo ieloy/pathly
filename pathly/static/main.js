@@ -125,9 +125,12 @@ async function uploadKml(event) {
 
   const fileInput = document.getElementById("file-upload");
   const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const status = document.getElementById("kml_status");
 
   const formData = new FormData();
   formData.append("kml_file", fileInput.files[0]);
+
+  status.style.display = "block";
 
   const response = await fetch(`/handle_kml`, {
     method: "POST",
@@ -137,6 +140,8 @@ async function uploadKml(event) {
     }
   });
   const data = await response.json();
+
+  status.textContent = "KML file processed!"
 }
 
 // function to add specification
@@ -370,13 +375,33 @@ function displayRoute(routeData) {
     document.getElementById("route_map"),
     {
       zoom: 10,
-      center: routeData.origin.coordinates
+      center: routeData.origin.coordinates,
+      mapId: "5f23ba9b1bf8f32941aec23d"
     }
   );
 
-    const routePolyline = new google.maps.Polyline({
-      path: path
+  const routePolyline = new google.maps.Polyline({
+    path: path
   });
+
+  const markers = []
+
+  const locations = [
+    routeData.origin,
+    routeData.destination,
+    ...routeData.intermediates
+  ]
+
+  locations.forEach(function (i, x) {
+    markers.push(i.coordinates)
+  })
+
+  markers.forEach(function (i) {
+    const markerView = new google.maps.marker.AdvancedMarkerElement({
+      map,
+      position: i
+    });
+  })
 
   routePolyline.setMap(map);
 }

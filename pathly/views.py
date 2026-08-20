@@ -140,7 +140,7 @@ def handle_kml(request):
 
     # Check placemarks in the KML file and store their data in a dict
     location_id = 0
-    for placemark in placemarks[0:25]:
+    for placemark in placemarks:
       name = placemark.find("kml:name", ns)
       coordinates = placemark.find(".//kml:coordinates", ns)
       styleUrl = placemark.find(".//kml:styleUrl", ns)
@@ -157,7 +157,7 @@ def handle_kml(request):
       coordinates_text = coordinates.text.strip()
       lon, lat, *_ = coordinates_text.split(",")
       places[name.text] = [
-        f"{lat},{lon}", 
+        f"{lat},{lon}",
         style_url_text,
         icon_url,
         icon_color,
@@ -189,7 +189,6 @@ def handle_specifications(request):
 
     # Apply specifications to the places and create the groups
     groups = apply_specifications(request, get_places(request), specifications, group_amount)
-    print(groups)
 
     return JsonResponse({
       "success": True,
@@ -497,6 +496,16 @@ def calculate_route(request):
     associated_locations[i]
     for i in optimized_indexes
   ]
+
+  for location in optimized_locations:
+    lat, lng = location["coordinates"].split(",")
+
+    location["coordinates"] = {
+      "lat": float(lat),
+      "lng": float(lng)
+    }
+
+
   route_result = {
     "origin": origin,
     "destination": destination,

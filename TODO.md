@@ -2,7 +2,6 @@ TODO fixes:
 - (BUG) sort_locations geeft momenteel een crash als er nog geen KML-file is geupload, dit crasht dan dus meerdere pagina's
 - check of sorting.html nu werkt, aangezien ik daar niet de ids meegeef zoals in manual_sorting
 - model creëren voor user en hier een db aan toevoegen met opgeslagen groepen 
-- markers creëren op de getekende route adhv de coordinaten van de locaties
 - linkje naar de plek waar je die kml file kan maken
 - video maken voor common case scenario
 
