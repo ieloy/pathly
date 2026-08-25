@@ -17,6 +17,6 @@ urlpatterns = [
     path("sort_manually", views.sort_manually, name="sort_manually"),
     path("calculate_route", views.calculate_route, name="calculate_route"),
     path("register", views.register, name="register"),
-    path("login", views.login, name="login"),
+    path("login_view", views.login_view, name="login_view"),
     path("admin/", admin.site.urls),
 ]

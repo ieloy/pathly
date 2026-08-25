@@ -3,10 +3,14 @@ import os
 import random
 import requests
 import xml.etree.ElementTree as ET
+from django.contrib.auth import authenticate, login, logout
+from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from dotenv import load_dotenv
 from google.maps import routing_v2
+
+from .models import User
 
 
 # Create your views here.
@@ -33,41 +37,90 @@ def register(request):
         "message": "Passwords must match"
       })
     
-    print("match")
+    # model veranderen in de database
+    try:
+      user = User.objects.create_user(
+        username=username, 
+        password=password
+        )
+      
+      user.save()
+      print("saved")
 
-    return render(request, "pathly/login.html")
+    except IntegrityError:
+      print("something went wrong")
+      return render(request, "pathly/register.html", {
+        "message": "Username already taken!"
+      })
+
+    user = authenticate(
+      request,
+      username=username,
+      password=password
+    )
+
+    print(user)
+
+    if user is not None:
+      login(request, user)
+    else:
+      return render(request, "pathly/register.html", {
+        "message": "Something went wrong, try again."
+      })
+
+    return render(request, "pathly/index.html")
   
   else:
     return render(request, "pathly/register.html")
 
+def login_view(request):
+  if request.method == "POST":
+    username = request.POST["username"]
+    password = request.POST["password"]
 
-def login(request):
-  return render(request, "pathly/login.html")
+    user = authenticate(
+      request,
+      username=username,
+      password=password
+    )
+
+    if user is not None:
+      login(request, user)
+      return render(request, "pathly/index.html")
+    else:
+      return render(request, "pathly/login_view.html", {
+        "message": "Something went wrong"
+      })
+    
+  return render(request, "pathly/login_view.html")
 
 def routes(request):
-  groups = request.session.get("sorted_groups")
-  locations_by_id = get_locations_by_id(get_places(request))
-  api_key = get_credentials()
+  if request.user.is_authenticated:
+    groups = request.session.get("sorted_groups")
+    locations_by_id = get_locations_by_id(get_places(request))
+    api_key = get_credentials()
 
-  sorted_groups = {}
+    sorted_groups = {}
 
-  for index, (group_key, location_ids) in enumerate(groups.items(), start=1):
-    location_list = []
+    for index, (group_key, location_ids) in enumerate(groups.items(), start=1):
+      location_list = []
 
-    for location_id in location_ids:
-      location_list.append(
-        locations_by_id[int(location_id)]
-      )
-    
-    sorted_groups[group_key] = {
-      "name": f"Group {index}",
-      "locations": location_list,
-    }
+      for location_id in location_ids:
+        location_list.append(
+          locations_by_id[int(location_id)]
+        )
+      
+      sorted_groups[group_key] = {
+        "name": f"Group {index}",
+        "locations": location_list,
+      }
 
-  return render(request, "pathly/routes.html", {
-    "places": sorted_groups,
-    "api_key": api_key
-  })
+    return render(request, "pathly/routes.html", {
+      "places": sorted_groups,
+      "api_key": api_key
+    })
+  else:
+    return render(request, "pathly/login_view.html")
 
 def mapinfo(request):
   places = request.session.get("places_extra_info")
