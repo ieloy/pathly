@@ -3,33 +3,37 @@ import os
 import random
 import requests
 import xml.etree.ElementTree as ET
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from dotenv import load_dotenv
 from google.maps import routing_v2
 
-from .models import User
+from .models import User, Groupsaves
 
 
 # Create your views here.
+@login_required
 def index(request):
-  if request.user.is_authenticated:
     places = get_places(request)
+    message = ""
+
+    if not places:
+      message = "Make sure to upload your kml file first!"
+
     return render(request, "pathly/index.html", {
-      "places": places
+      "places": places,
+      "message": message
     })
-  else:
-    return render(request, "pathly/register.html")
-  
+
 def register(request):
   if request.method == "POST":
     username = request.POST["username"]
     password = request.POST["password"]
     confirm_password = request.POST["confirm_password"]
-    print(password)
-    print(confirm_password)
 
     if password != confirm_password:
       print("no matcho")
@@ -44,9 +48,6 @@ def register(request):
         password=password
         )
       
-      user.save()
-      print("saved")
-
     except IntegrityError:
       print("something went wrong")
       return render(request, "pathly/register.html", {
@@ -59,8 +60,6 @@ def register(request):
       password=password
     )
 
-    print(user)
-
     if user is not None:
       login(request, user)
     else:
@@ -68,7 +67,7 @@ def register(request):
         "message": "Something went wrong, try again."
       })
 
-    return render(request, "pathly/index.html")
+    return redirect("index")
   
   else:
     return render(request, "pathly/register.html")
@@ -86,18 +85,47 @@ def login_view(request):
 
     if user is not None:
       login(request, user)
-      return render(request, "pathly/index.html")
+      return redirect("index")
     else:
       return render(request, "pathly/login_view.html", {
         "message": "Something went wrong"
       })
     
-  return render(request, "pathly/login_view.html")
+  else:
+    return render(request, "pathly/login_view.html")
 
+@login_required
+def mapinfo(request):
+    places = request.session.get("places_extra_info")
+
+    if not places:
+      return redirect("index")
+
+    return render(request, "pathly/mapinfo.html", {
+      "places": places
+    })
+
+@login_required
 def routes(request):
-  if request.user.is_authenticated:
     groups = request.session.get("sorted_groups")
-    locations_by_id = get_locations_by_id(get_places(request))
+    places = request.session.get("places")
+
+    if not groups or not places:
+      saved_groups = Groupsaves.objects.filter(
+        user=request.user
+      ).order_by("-created_at").first()
+
+      if saved_groups and saved_groups.places:
+        groups = saved_groups.groups
+        places = saved_groups.places
+
+        request.session["sorted_groups"] = groups
+        request.session["places"] = places
+      else:
+        messages.error(request, "Make sure to sort your locations first!")
+        return redirect("sorting")
+    
+    locations_by_id = get_locations_by_id(places)
     api_key = get_credentials()
 
     sorted_groups = {}
@@ -119,45 +147,71 @@ def routes(request):
       "places": sorted_groups,
       "api_key": api_key
     })
-  else:
-    return render(request, "pathly/login_view.html")
 
-def mapinfo(request):
-  places = request.session.get("places_extra_info")
-
-  return render(request, "pathly/mapinfo.html", {
-    "places": places
-  })
-
-def about(request):
-  places = get_places(request)
-  return render(request, "pathly/about.html", {
-    "places": places
-  })
-
-def sorting(request):
-  places = get_places(request)
-  sorted_places = sort_locations(places)
-  
-  return render(request, "pathly/sorting.html", {
-    "places": sorted_places
-  })
-
-def manual_sorting(request):
-  places = get_places(request)
-  sorted_places = sort_locations(places)
-  
-  return render(request, "pathly/manual_sorting.html", {
-    "places": sorted_places
-  })
-
+@login_required
 def adminkml(request):
-  places = get_places(request)
-  return render(request, "pathly/adminkml.html", {
-    "places": places
-  })
+    places = get_places(request)
 
+    return render(request, "pathly/adminkml.html", {
+      "places": places
+    })
+
+@login_required
+def sorting(request):
+    places = get_places(request)
+
+    if not places:
+      return redirect("index")
+    
+    sorted_places = sort_locations(places)
+    
+    return render(request, "pathly/sorting.html", {
+      "places": sorted_places
+    })
+
+@login_required
+def manual_sorting(request):
+    places = get_places(request)
+
+    if not places:
+      return redirect("index")
+    
+    sorted_places = sort_locations(places)
+    
+    return render(request, "pathly/manual_sorting.html", {
+      "places": sorted_places
+    })
+
+@login_required
+def about(request):
+    return render(request, "pathly/about.html")
+
+@login_required
+def logout_view(request):
+  if request.method == "POST":
+    logout(request)
+    return redirect("login_view")
+  
+  return redirect("index")
+  
 #helper functions
+@login_required
+def save_groups(request):
+  if request.method == "POST":
+    groups = request.session.get("sorted_groups")
+    places = request.session.get("places")
+
+    groupsaves = Groupsaves.objects.create(
+      user=request.user,
+      groups=groups,
+      places=places
+    )
+
+    groupsaves.save()
+
+  return JsonResponse({"Success": True})
+
+@login_required
 def handle_kml(request):
   if request.method == "POST":
     kml_file = request.FILES.get("kml_file")
@@ -261,6 +315,7 @@ def handle_kml(request):
         "size": kml_file.size,
       })
 
+@login_required
 def handle_specifications(request):
   if request.method == "POST":
     data = json.loads(request.body)
@@ -466,6 +521,7 @@ def sort_locations(places):
 
   return sorted_places
 
+@login_required
 def sort_manually(request):
   if request.method == "POST":
     data = json.loads(request.body)
@@ -489,6 +545,7 @@ def sort_manually(request):
   else:
     return JsonResponse({"success": False, "error": "Invalid request method."})
 
+@login_required
 def calculate_route(request):
   data = json.loads(request.body)
   chosen_group = data["chosenGroup"]

@@ -22,12 +22,19 @@
         <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
         <li><a href="{% url 'sorting' %}">Sorting</a></li>
         <li><a href="{% url 'about' %}">About</a></li>
+        <li>
+          <form action="{% url 'logout_view' %}" method="post">
+          {% csrf_token %}
+          <button type="submit">Logout</button>
+          </form>
+        </li>
       </ul>
     </nav>
   </header>
   <h1>Routes</h1>
   <h3>View the most optimal routing here.</h3>
   {% if places %}
+  <button id="save_groups">Save Groups</button>
   <div id="routes_groups">
     {% for name, group_data in places.items %}
     <div class="route_group">

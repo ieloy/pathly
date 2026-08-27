@@ -17,12 +17,23 @@
         <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
         <li><a href="{% url 'sorting' %}">Sorting</a></li>
         <li><a href="{% url 'about' %}">About</a></li>
+        <li>
+          <form action="{% url 'logout_view' %}" method="post">
+          {% csrf_token %}
+          <button type="submit">Logout</button>
+          </form>
+        </li>
       </ul>
     </nav>
   </header>
   <h1>Sorting</h1>
   <h3>Sort your selected locations accordingly here.</h3>
   {% if places %}
+    {% if messages %}
+      {% for message in messages %}
+        <h3>{{ message }}</h3>
+      {% endfor %}
+    {% endif %}
   <div class="groups_container">
     {% for marker_code, marker_data in places.items %}
     <div class="marker_container">

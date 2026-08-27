@@ -13,6 +13,7 @@ addEventListener("DOMContentLoaded", (event) => {
   const removeFromGroupButton = document.querySelector("#remove_from_group");
   const submitManualForm = document.querySelector("#manual_sorting_button");
   const routesForm = document.querySelector("#routes_form");
+  const saveGroupsButton = document.getElementById("save_groups");
 
 
   let activeGroup = null;
@@ -117,6 +118,9 @@ addEventListener("DOMContentLoaded", (event) => {
     routesForm.addEventListener("submit", handleRoutesForm);
   }
 
+  if (saveGroupsButton) {
+    saveGroupsButton.addEventListener("click", saveGroups);
+  }
 });
 
 // function to handle uploaded KML file
@@ -404,4 +408,22 @@ function displayRoute(routeData) {
   })
 
   routePolyline.setMap(map);
+}
+
+async function saveGroups(event) {
+  event.preventDefault();
+
+  const csrftoken = document.querySelector(
+    '[name=csrfmiddlewaretoken]'
+  ).value;
+
+  const response = await fetch(`/save_groups`, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": csrftoken
+    }
+  });
+
+  const data = await response.json();
+  console.log(data);
 }

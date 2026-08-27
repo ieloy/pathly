@@ -15,6 +15,12 @@
           <li><a href="{% url 'adminkml' %}">Admin KML</a></li>
           <li><a href="{% url 'sorting' %}">Sorting</a></li>
           <li><a href="{% url 'about' %}">About</a></li>
+          <li>
+            <form action="{% url 'logout_view' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+            </form>
+          </li>
         </ul>
       </nav>
     </header>

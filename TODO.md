@@ -4,6 +4,8 @@ TODO fixes:
 - model creëren voor user en hier een db aan toevoegen met opgeslagen groepen 
 - linkje naar de plek waar je die kml file kan maken
 - video maken voor common case scenario
+- correct routen in elke view, nu kan hij crashen bij een login omdat get_places niks kan returnen (moet eerst naar adminkml)
+- fixen dat een harde refresh van de page niet ineens opnieuw een form verstuurd en de boel in de war raakt
 
 
 - css fixen (aan het einde)

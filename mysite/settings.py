@@ -124,3 +124,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # User specification
 AUTH_USER_MODEL = "pathly.User"
+
+LOGIN_URL = "login_view"
