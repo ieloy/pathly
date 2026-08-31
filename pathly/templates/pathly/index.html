@@ -3,6 +3,7 @@
 <head>
   <title>Hello, Pathly!</title>
   <link href="static/styles.css" rel="stylesheet">
+  {% load static %}
 </head>
 <body>
   <header>
@@ -35,6 +36,8 @@
     {% else %}
       Firstly: navigate to <a href="{% url 'adminkml' %}">Admin KML</a> in order to upload your KML file.</p>
     {% endif %}
+    <h3>Video below displays the common case use for this web app.</h3>
+    <video muted style="width: 800px;" controls src="{% static 'pathly/media/happy_flow_pathly.mp4' %}"></video>
     {% if message %}
       <h3>{{ message }}</h3>
     {% endif %}
