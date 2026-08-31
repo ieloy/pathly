@@ -29,7 +29,7 @@
     <div id="file-upload-div">
       <form id="kml-upload-form" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        <label for="file-upload" id="upload-btn">Upload KML bestand</label>
+        <label for="file-upload" id="upload-btn">Upload KML file</label>
         <input id="file-upload" type="file" accept=".kml" hidden>
         <button id="submit-btn" type="submit">Submit</button>
       </form>

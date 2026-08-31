@@ -328,6 +328,19 @@ async function handleRoutesForm(event) {
   });
 
   const routeData = await response.json();
+  const waypointString = routeData.intermediates.map(location => `${location.coordinates.lat},${location.coordinates.lng}`).join("|");
+  
+  const googleMapsUrl =
+  `https://www.google.com/maps/dir/?api=1` +
+  `&origin=${routeData.origin.coordinates.lat},${routeData.origin.coordinates.lng}` +
+  `&destination=${routeData.destination.coordinates.lat},${routeData.destination.coordinates.lng}` +
+  `&waypoints=${encodeURIComponent(waypointString)}` +
+  `&travelmode=driving`;
+
+  const googleMapsLink = document.getElementById("google_maps_link");
+
+  googleMapsLink.href = googleMapsUrl;
+  googleMapsLink.style.display = "inline";
 
   displayRoute(routeData)
 }
@@ -408,6 +421,8 @@ function displayRoute(routeData) {
   })
 
   routePolyline.setMap(map);
+
+
 }
 
 async function saveGroups(event) {

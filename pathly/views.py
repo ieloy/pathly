@@ -275,7 +275,7 @@ def handle_kml(request):
 
     # Check placemarks in the KML file and store their data in a dict
     location_id = 0
-    for placemark in placemarks:
+    for placemark in placemarks[0:25]:
       name = placemark.find("kml:name", ns)
       coordinates = placemark.find(".//kml:coordinates", ns)
       styleUrl = placemark.find(".//kml:styleUrl", ns)
@@ -300,7 +300,7 @@ def handle_kml(request):
       ]
 
       location_id += 1
-      
+            
     # Find relevant extra info for each place
     places_extra_info = find_location_info(places)
     
@@ -505,7 +505,7 @@ def sort_locations(places):
   sorted_places = {}
 
   for place, place_data in places.items():
-    marker_code = place_data[1]
+    marker_code = place_data[3]
 
     # add new marker code to the dict if that marker code isn't already present
     if marker_code not in sorted_places:
