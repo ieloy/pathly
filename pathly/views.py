@@ -10,7 +10,6 @@ from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from dotenv import load_dotenv
-from google.maps import routing_v2
 
 from .models import User, Groupsaves
 
@@ -20,6 +19,7 @@ from .models import User, Groupsaves
 def index(request):
     places = get_places(request)
     message = ""
+    print(places)
 
     if not places:
       message = "Make sure to upload your kml file first!"
@@ -232,7 +232,7 @@ def handle_kml(request):
       "kml": "http://www.opengis.net/kml/2.2"
     }
 
-    # Check markers in the root of the KML file and store them correctly in the dict
+    # Check markers in the root of the KML file and store them correctly in the dict to be able to get their color
     for style in root.findall(".//kml:Style", ns):
       style_id = style.get("id")
       icon_href = style.find(".//kml:Icon/kml:href", ns)
@@ -255,7 +255,7 @@ def handle_kml(request):
           "color": css_color
         }
 
-    # Check StyleMap and store them in the dict
+    # Check StyleMap and store them in the dict, essentially a code that represents the marker
     for style_map in root.findall(".//kml:StyleMap", ns):
       style_map_id = style_map.get("id")
 
@@ -275,7 +275,7 @@ def handle_kml(request):
 
     # Check placemarks in the KML file and store their data in a dict
     location_id = 0
-    for placemark in placemarks[0:25]:
+    for placemark in placemarks:
       name = placemark.find("kml:name", ns)
       coordinates = placemark.find(".//kml:coordinates", ns)
       styleUrl = placemark.find(".//kml:styleUrl", ns)
@@ -351,8 +351,6 @@ def apply_specifications(request, places, specifications, group_amount):
   # Create groups based on specifications
   valid_groups = create_groups(locations, specifications, group_amount)
 
-  # If there are still invalid locations, retry to add them in groups (TODO)
-
   # Store the sorted groups in the session for easier access
   sorted_groups = {}
 
@@ -398,6 +396,8 @@ def create_groups(locations, specifications, group_amount):
       invalid_locations.extend(group)
   
   # If there are still invalid locations, retry to add them in groups (TODO)
+
+  # Return valid groups
   return valid_groups
 
 def can_add_location(group, location, specifications, group_amount):  
