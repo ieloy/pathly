@@ -203,8 +203,6 @@ async function handleSpecifications(event) {
   });
 
   const data = await response.json();
-  console.log("Reponse", data.groups);
-
 }
 
 function setupSpecificationContainer(container) {
@@ -296,7 +294,6 @@ async function sortManualGroups(event) {
 
   const data = await response.json();
   if (data === "success") {
-    console.log("success")
     document.querySelector("#manual_sorting_form").style.display = "none";
     document.getElementById("finished_grouping").style.display = "block";
     alert("Groups sorted successfully! Head on to routes.");
@@ -440,5 +437,4 @@ async function saveGroups(event) {
   });
 
   const data = await response.json();
-  console.log(data);
 }

@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from dotenv import load_dotenv
 
@@ -19,7 +19,6 @@ from .models import User, Groupsaves
 def index(request):
     places = get_places(request)
     message = ""
-    print(places)
 
     if not places:
       message = "Make sure to upload your kml file first!"
@@ -36,12 +35,11 @@ def register(request):
     confirm_password = request.POST["confirm_password"]
 
     if password != confirm_password:
-      print("no matcho")
       return render(request, "pathly/register.html", {
         "message": "Passwords must match"
       })
     
-    # model veranderen in de database
+    # change model in db
     try:
       user = User.objects.create_user(
         username=username, 
@@ -49,7 +47,6 @@ def register(request):
         )
       
     except IntegrityError:
-      print("something went wrong")
       return render(request, "pathly/register.html", {
         "message": "Username already taken!"
       })
@@ -535,8 +532,6 @@ def sort_manually(request):
       locations = group["locationIds"]
 
       manual_groups[group_id] = locations
-
-    print(manual_groups)
 
     request.session["sorted_groups"] = manual_groups
       
